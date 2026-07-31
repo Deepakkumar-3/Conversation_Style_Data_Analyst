@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import traceback
+import os
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 
@@ -161,7 +163,6 @@ st.markdown("---")
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Settings")
-    api_key = st.text_input("Groq API Key", type="password", placeholder="gsk_...")
     model   = st.selectbox("Model", ["llama-3.1-8b-instant", "llama3-8b-8192"])
     st.markdown("---")
     st.markdown("### 💡 Sample Questions")
@@ -218,6 +219,10 @@ if uploaded_file:
     st.markdown("---")
 
     # Chat Interface
+
+    load_dotenv()
+    api_key = os.getenv("GROQ_API_KEY")
+
     if api_key:
         llm = ChatGroq(api_key=api_key, model_name=model, temperature=0)
 
@@ -276,6 +281,9 @@ if uploaded_file:
 
     else:
         st.warning("⚠️ Enter your Groq API key in the sidebar to start chatting.")
+
+elif not uploaded_file:
+    st.info("👆 Upload a CSV file to get started.")bar to start chatting.")
 
 elif not uploaded_file:
     st.info("👆 Upload a CSV file to get started.")

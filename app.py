@@ -4,7 +4,7 @@ import numpy as np
 import plotly.express as px
 import traceback
 import os
-from python-dotenv import load_dotenv
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 

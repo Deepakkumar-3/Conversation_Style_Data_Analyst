@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 
+load_dotenv()
+api_key = os.getenv("GROQ_API_KEY")
+
 # ── Page Config ───────────────────────────────────────────
 st.set_page_config(
     page_title="AI Data Analyst",
@@ -219,9 +222,6 @@ if uploaded_file:
     st.markdown("---")
 
     # Chat Interface
-
-    load_dotenv()
-    api_key = os.getenv("GROQ_API_KEY")
 
     if api_key:
         llm = ChatGroq(api_key=api_key, model_name=model, temperature=0)

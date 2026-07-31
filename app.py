@@ -33,6 +33,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ── API Key Check ─────────────────────────────────────────
+if not api_key:
+    st.error(
+        "⚠️ GROQ_API_KEY not found.\n\n"
+        "Create a `.env` file in the project root with:\n\n"
+        "```\nGROQ_API_KEY=your-groq-api-key-here\n```\n\n"
+        "Then restart the app."
+    )
+    st.stop()
+
 # ── Helper Functions ──────────────────────────────────────
 def get_dataframe_context(df):
     return f"""
@@ -222,65 +232,60 @@ if uploaded_file:
     st.markdown("---")
 
     # Chat Interface
+    llm = ChatGroq(api_key=api_key, model_name=model, temperature=0)
 
-    if api_key:
-        llm = ChatGroq(api_key=api_key, model_name=model, temperature=0)
+    st.markdown("### 💬 Chat with Your Data")
 
-        st.markdown("### 💬 Chat with Your Data")
+    # Display conversation history
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.markdown(f'<div class="chat-user">🧑 <b>You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="chat-ai">🤖 <b>AI Analyst:</b></div>', unsafe_allow_html=True)
 
-        # Display conversation history
-        for msg in st.session_state.messages:
-            if msg["role"] == "user":
-                st.markdown(f'<div class="chat-user">🧑 <b>You:</b> {msg["content"]}</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="chat-ai">🤖 <b>AI Analyst:</b></div>', unsafe_allow_html=True)
-                
-                # Show result
-                if msg.get("result") is not None:
-                    formatted = format_result(msg["result"])
-                    if isinstance(formatted, (pd.DataFrame, pd.Series)):
-                        st.dataframe(formatted, use_container_width=True)
-                    else:
-                        st.success(f"**Result:** {formatted}")
+            # Show result
+            if msg.get("result") is not None:
+                formatted = format_result(msg["result"])
+                if isinstance(formatted, (pd.DataFrame, pd.Series)):
+                    st.dataframe(formatted, use_container_width=True)
+                else:
+                    st.success(f"**Result:** {formatted}")
 
-                # Show chart
-                if msg.get("fig"):
-                    st.plotly_chart(msg["fig"], use_container_width=True)
+            # Show chart
+            if msg.get("fig"):
+                st.plotly_chart(msg["fig"], use_container_width=True)
 
-                # Show code expander
-                if msg.get("code"):
-                    with st.expander("🔎 View Generated Code"):
-                        st.code(msg["code"], language="python")
+            # Show code expander
+            if msg.get("code"):
+                with st.expander("🔎 View Generated Code"):
+                    st.code(msg["code"], language="python")
 
-        # Input
-        question = st.chat_input("Ask anything about your data...")
+    # Input
+    question = st.chat_input("Ask anything about your data...")
 
-        if question:
-            # Add user message
-            st.session_state.messages.append({"role": "user", "content": question})
+    if question:
+        # Add user message
+        st.session_state.messages.append({"role": "user", "content": question})
 
-            with st.spinner("🤖 Analyzing your data..."):
-                result, code, error, st.session_state.chat_history = run_pipeline(
-                    question, df, llm, st.session_state.chat_history
-                )
+        with st.spinner("🤖 Analyzing your data..."):
+            result, code, error, st.session_state.chat_history = run_pipeline(
+                question, df, llm, st.session_state.chat_history
+            )
 
-                fig = None
-                if result is not None and error is None:
-                    fig, _ = generate_chart(result, question, llm)
+            fig = None
+            if result is not None and error is None:
+                fig, _ = generate_chart(result, question, llm)
 
-            # Add AI message
-            st.session_state.messages.append({
-                "role":   "assistant",
-                "result": result,
-                "code":   code,
-                "fig":    fig,
-                "error":  error
-            })
+        # Add AI message
+        st.session_state.messages.append({
+            "role":   "assistant",
+            "result": result,
+            "code":   code,
+            "fig":    fig,
+            "error":  error
+        })
 
-            st.rerun()
+        st.rerun()
 
-    else:
-        st.warning("⚠️ Enter your Groq API key in the sidebar to start chatting.")
-
-elif not uploaded_file:
+else:
     st.info("👆 Upload a CSV file to get started.")

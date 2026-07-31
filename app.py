@@ -283,7 +283,4 @@ if uploaded_file:
         st.warning("⚠️ Enter your Groq API key in the sidebar to start chatting.")
 
 elif not uploaded_file:
-    st.info("👆 Upload a CSV file to get started.")bar to start chatting.")
-
-elif not uploaded_file:
     st.info("👆 Upload a CSV file to get started.")

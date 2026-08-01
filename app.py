@@ -10,6 +10,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 
 load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
+api_key = st.secrets["GROQ_API_KEY"]
 
 # ── Page Config ───────────────────────────────────────────
 st.set_page_config(
